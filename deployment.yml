@@ -1,0 +1,51 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: update-certs
+  namespace: manta
+  labels:
+    app: update-certs
+spec:
+  replicas: 1
+  strategy: 
+    type: Recreate
+  selector:
+    matchLabels:
+      app: update-certs
+  template:
+    metadata:
+      labels: 
+        app: update-certs
+    spec:
+      serviceAccount: acme
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: update-certs
+          image: registry.beappia.com/alvistar/acme:latest
+          volumeMounts:
+            - mountPath: /pre-script.sh
+              subPath: pre-script.sh
+              name: scripts
+            - mountPath: /certs
+              name: certs
+          envFrom:
+            - configMapRef:
+                name: acme-envs
+            - secretRef:
+                name: acme
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "10m"
+            limits:
+              memory: "512Mi"
+              cpu: "256m"
+      volumes:
+        - name: scripts
+          configMap:
+              name: acme-scripts
+        - name: certs
+          persistentVolumeClaim:
+              claimName: acme
+           

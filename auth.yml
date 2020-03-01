@@ -1,0 +1,29 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: acme
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "watch", "list","create","update","patch"]
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: acme
+  namespace: acme
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: acme
+subjects:
+- kind: ServiceAccount
+  name: acme
+  namespace: acme
+roleRef:
+  kind: ClusterRole 
+  name: acme 
+  apiGroup: rbac.authorization.k8s.io
